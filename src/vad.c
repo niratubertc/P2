@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "pav_analysis.h"
 #include "vad.h"
 
 const float FRAME_TIME = 10.0F; /* in ms. */
@@ -13,15 +13,16 @@ const float FRAME_TIME = 10.0F; /* in ms. */
  */
 
 const char *state_str[] = {
-  "UNDEF", "S", "V", "INIT"
-};
+    "UNDEF", "MV", "MS", "S", "V", "INIT"};
 
-const char *state2str(VAD_STATE st) {
+const char *state2str(VAD_STATE st)
+{
   return state_str[st];
 }
 
 /* Define a datatype with interesting features */
-typedef struct {
+typedef struct
+{
   float zcr;
   float p;
   float am;
@@ -31,7 +32,8 @@ typedef struct {
  * TODO: Delete and use your own features!
  */
 
-Features compute_features(const float *x, int N) {
+Features compute_features(const float *x, int N)
+{
   /*
    * Input: x[i] : i=0 .... N-1 
    * Ouput: computed features
@@ -42,7 +44,10 @@ Features compute_features(const float *x, int N) {
    * For the moment, compute random value between 0 and 1 
    */
   Features feat;
-  feat.zcr = feat.p = feat.am = (float) rand()/RAND_MAX;
+  float fm = 16000;
+  feat.zcr = compute_zcr(x, N, fm);
+  feat.p = compute_power(x, N);
+  feat.am = compute_am(x, N);
   return feat;
 }
 
@@ -50,7 +55,8 @@ Features compute_features(const float *x, int N) {
  * TODO: Init the values of vad_data
  */
 
-VAD_DATA * vad_open(float rate) {
+VAD_DATA *vad_open(float rate)
+{
   VAD_DATA *vad_data = malloc(sizeof(VAD_DATA));
   vad_data->state = ST_INIT;
   vad_data->sampling_rate = rate;
@@ -58,7 +64,8 @@ VAD_DATA * vad_open(float rate) {
   return vad_data;
 }
 
-VAD_STATE vad_close(VAD_DATA *vad_data) {
+VAD_STATE vad_close(VAD_DATA *vad_data)
+{
   /* 
    * TODO: decide what to do with the last undecided frames
    */
@@ -68,7 +75,8 @@ VAD_STATE vad_close(VAD_DATA *vad_data) {
   return state;
 }
 
-unsigned int vad_frame_size(VAD_DATA *vad_data) {
+unsigned int vad_frame_size(VAD_DATA *vad_data)
+{
   return vad_data->frame_length;
 }
 
@@ -77,7 +85,15 @@ unsigned int vad_frame_size(VAD_DATA *vad_data) {
  * using a Finite State Automata
  */
 
-VAD_STATE vad(VAD_DATA *vad_data, float *x) {
+VAD_STATE vad(VAD_DATA *vad_data, float *x)
+{
+  // float k0;
+  float sum;
+  // float k1;
+  //const float minsilence = 0.23;
+  //const float minvoice = 0.00275;
+  int count, count1, count2, count3, count4;
+  clock_t time;
 
   /* 
    * TODO: You can change this, using your own features,
@@ -87,19 +103,91 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
   Features f = compute_features(x, vad_data->frame_length);
   vad_data->last_feature = f.p; /* save feature, in case you want to show */
 
-  switch (vad_data->state) {
+  switch (vad_data->state)
+  {
   case ST_INIT:
-    vad_data->state = ST_SILENCE;
+
+    if (count < 10)
+    {
+      sum += pow(10, f.p / 10);
+      count++;
+    }
+    else
+    {
+      vad_data->state = ST_SILENCE;
+      count = 0;
+      vad_data->k0 = 10 * log10(sum / 10);
+      vad_data->k1 = vad_data->k0 + 20;
+      sum = 0;
+    }
     break;
 
   case ST_SILENCE:
-    if (f.p > 0.95)
-      vad_data->state = ST_VOICE;
+    //float k1=k0+10; // tenint en compte que la pot sera aprox 90, la menor potencia de fricatives es 76, agafem 80 que es una mica per sota d'aquestes
+
+    if (f.p > vad_data->k1)
+    {
+      vad_data->state = ST_MAYBE_VOICE;
+      
+    } //  time = clock(); // start timer
+
+    break;
+
+  case ST_MAYBE_VOICE:
+    if (f.p > vad_data->k1)
+    {
+      //time = clock() - time;
+      if (count >= 3)
+      {
+        vad_data->state = ST_VOICE;
+        count = 0;
+      }
+      count4++;
+      if(count4 < 3){
+        vad_data->state = ST_SILENCE;
+      }
+    }
+    if (f.p < vad_data->k1)
+    {
+      vad_data->state = ST_SILENCE;
+      count = 0;
+    }
+
+    count++;
     break;
 
   case ST_VOICE:
-    if (f.p < 0.01)
-      vad_data->state = ST_SILENCE;
+    if (f.p < vad_data->k1)
+    {
+      vad_data->state = ST_MAYBE_SILENCE;
+    }
+    // time = clock(); // start timer
+
+    break;
+
+  case ST_MAYBE_SILENCE:
+
+    if (f.p < vad_data->k1)
+    {
+      // time = clock() - time;
+      if (count1 >= 13)
+      {
+        vad_data->state = ST_SILENCE;
+        count1 = 0;
+      }
+      count3++;
+      if(count3 < 13){
+        vad_data->state = ST_VOICE;
+        count3=0;
+      }
+    }
+    if (f.p > vad_data->k1)
+    {
+      vad_data->state = ST_VOICE;
+      count1 = 0;
+    }
+    count1++;
+
     break;
 
   case ST_UNDEF:
@@ -109,10 +197,14 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x) {
   if (vad_data->state == ST_SILENCE ||
       vad_data->state == ST_VOICE)
     return vad_data->state;
+  else if(vad_data->state == ST_INIT)
+    return ST_SILENCE;
   else
     return ST_UNDEF;
+
 }
 
-void vad_show_state(const VAD_DATA *vad_data, FILE *out) {
+void vad_show_state(const VAD_DATA *vad_data, FILE *out)
+{
   fprintf(out, "%d\t%f\n", vad_data->state, vad_data->last_feature);
 }
