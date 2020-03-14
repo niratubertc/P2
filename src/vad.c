@@ -13,7 +13,7 @@ const float FRAME_TIME = 10.0F; /* in ms. */
  */
 
 const char *state_str[] = {
-    "UNDEF", "MV", "MS", "S", "V", "INIT"};
+    "UNDEF", "MS", "MV", "S", "V", "INIT"};
 
 const char *state2str(VAD_STATE st)
 {
@@ -109,15 +109,18 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
 
     if (count < 10)
     {
-      sum += pow(10, f.p / 10);
+      //sum += pow(10, compute_features(x, vad_data->frame_length).p / 10);
+      sum += compute_features(x, vad_data->frame_length).p;
       count++;
     }
     else
     {
       vad_data->state = ST_SILENCE;
       count = 0;
-      vad_data->k0 = 10 * log10(sum / 10);
+      //vad_data->k0 = 10 * log10(sum /10);
+      vad_data->k0 = sum/10 + 1;
       vad_data->k1 = vad_data->k0 + 20;
+      vad_data->k2 = vad_data->k0 + 43;
       sum = 0;
     }
     break;
@@ -137,24 +140,24 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
     if (f.p > vad_data->k1)
     {
       //time = clock() - time;
-      if (count >= 3)
+      if (count1 > 42)
       {
         vad_data->state = ST_VOICE;
-        count = 0;
-      }
-      count4++;
-      if(count4 < 3){
-        vad_data->state = ST_SILENCE;
+        count1 = 0; 
+      }else{
+        vad_data->state = ST_MAYBE_VOICE;
       }
     }
+    
     if (f.p < vad_data->k1)
     {
+      count1 = 0;
       vad_data->state = ST_SILENCE;
-      count = 0;
+     
     }
-
-    count++;
+    count1++;
     break;
+    
 
   case ST_VOICE:
     if (f.p < vad_data->k1)
@@ -163,39 +166,37 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
     }
     // time = clock(); // start timer
 
-    break;
+  break;
 
   case ST_MAYBE_SILENCE:
 
     if (f.p < vad_data->k1)
     {
       // time = clock() - time;
-      if (count1 >= 13)
+      if (count2 >= 13)
       {
         vad_data->state = ST_SILENCE;
-        count1 = 0;
+        count2 = 0;
+      }else{
+        vad_data->state = ST_MAYBE_SILENCE;
       }
-      count3++;
-      if(count3 < 13){
-        vad_data->state = ST_VOICE;
-        count3=0;
-      }
+      
     }
-    if (f.p > vad_data->k1)
+   if (f.p > vad_data->k1)
     {
       vad_data->state = ST_VOICE;
-      count1 = 0;
+      count2 = 0;
     }
-    count1++;
+    count2++;
 
-    break;
+    break;    
 
   case ST_UNDEF:
     break;
   }
-
+  
   if (vad_data->state == ST_SILENCE ||
-      vad_data->state == ST_VOICE)
+      vad_data->state == ST_VOICE ||vad_data->state == ST_MAYBE_VOICE||vad_data->state == ST_MAYBE_SILENCE)
     return vad_data->state;
   else if(vad_data->state == ST_INIT)
     return ST_SILENCE;
