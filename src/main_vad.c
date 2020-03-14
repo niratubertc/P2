@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sndfile.h>
-
+#include <stdbool.h>
 #include "vad.h"
 #include "vad_docopt.h"
 
@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   int frame_size;         /* in samples */
   float frame_duration;   /* in seconds */
   unsigned int t, last_t; /* in frames */
-
+  bool primer, canviat;
   char	*input_wav, *output_vad, *output_wav;
 
   DocoptArgs args = docopt(argc, argv, /* help */ 1, /* version */ "2.0");
@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
 
   frame_duration = (float) frame_size/ (float) sf_info.samplerate;
   last_state = ST_UNDEF;
+  
+   
 
   for (t = last_t = 0; ; t++) { /* For each frame ... */
     /* End loop when file has finished (or there is an error) */
@@ -86,16 +88,18 @@ int main(int argc, char *argv[]) {
 
     /* TODO: print only SILENCE and VOICE labels */
     /* As it is, it prints UNDEF segments but is should be merge to the proper value */
-    if (state != last_state) {
+    if (state != last_state && state!=ST_MAYBE_VOICE && state!=ST_MAYBE_SILENCE ) {
       if (t != last_t)
         fprintf(vadfile, "%.5f\t%.5f\t%s\n", last_t * frame_duration, t * frame_duration, state2str(last_state));
       last_state = state;
       last_t = t;
     }
+    
 
     if (sndfile_out != 0) {
       /* TODO: go back and write zeros in silence segments */
     }
+ 
   }
 
   state = vad_close(vad_data);
