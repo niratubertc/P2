@@ -133,7 +133,9 @@ _**falta contestar**_
   el resumen).
   
   
-_Podemos ver que hay unas pequeñas discrepancias sobre el etiquetado. Se deben en parte que al etiquetar manualmente no se ha sido tan preciso como se quería_ **falta contestar**
+<img src="img/detector.PNG" width="640" align="center">
+  
+_Podemos ver que hay unas pequeñas discrepancias sobre el etiquetado. Se deben en parte que al etiquetar manualmente no se ha sido tan preciso como se quería, por otra parte hay algunos errores causados por errores en la programación_
 
 
 ### Trabajos de ampliación
