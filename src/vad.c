@@ -119,8 +119,8 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
       count = 0;
       //vad_data->k0 = 10 * log10(sum /10);
       vad_data->k0 = sum/10 + 1;
-      vad_data->k1 = vad_data->k0 + 20;
-      vad_data->k2 = vad_data->k0 + 43;
+      vad_data->k1 = vad_data->k0 + 27;
+      //vad_data->k2 = vad_data->k0 + 43;
       sum = 0;
     }
     break;
@@ -137,6 +137,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
     break;
 
   case ST_MAYBE_VOICE:
+
     if (f.p > vad_data->k1)
     {
       //time = clock() - time;
@@ -144,6 +145,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
       {
         vad_data->state = ST_VOICE;
         count1 = 0; 
+      
       }else{
         vad_data->state = ST_MAYBE_VOICE;
       }
@@ -196,9 +198,9 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
   }
   
   if (vad_data->state == ST_SILENCE ||
-      vad_data->state == ST_VOICE ||vad_data->state == ST_MAYBE_VOICE||vad_data->state == ST_MAYBE_SILENCE)
+      vad_data->state == ST_VOICE || vad_data->state == ST_MAYBE_VOICE || vad_data->state == ST_MAYBE_SILENCE)
     return vad_data->state;
-  else if(vad_data->state == ST_INIT)
+  else if (vad_data->state == ST_INIT)
     return ST_SILENCE;
   else
     return ST_UNDEF;
