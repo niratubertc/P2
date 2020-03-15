@@ -28,20 +28,11 @@ typedef struct
   float am;
 } Features;
 
-/* 
- * TODO: Delete and use your own features!
- */
-
 Features compute_features(const float *x, int N)
 {
   /*
    * Input: x[i] : i=0 .... N-1 
    * Ouput: computed features
-   */
-  /* 
-   * DELETE and include a call to your own functions
-   *
-   * For the moment, compute random value between 0 and 1 
    */
   Features feat;
   float fm = 16000;
@@ -50,10 +41,6 @@ Features compute_features(const float *x, int N)
   feat.am = compute_am(x, N);
   return feat;
 }
-
-/* 
- * TODO: Init the values of vad_data
- */
 
 VAD_DATA *vad_open(float rate)
 {
@@ -81,23 +68,17 @@ unsigned int vad_frame_size(VAD_DATA *vad_data)
 }
 
 /* 
- * TODO: Implement the Voice Activity Detection 
+ * Implement the Voice Activity Detection 
  * using a Finite State Automata
  */
 
 VAD_STATE vad(VAD_DATA *vad_data, float *x)
 {
-  // float k0;
   float sum;
-  // float k1;
-  //const float minsilence = 0.23;
-  //const float minvoice = 0.00275;
   int count, count1, count2, count3, count4;
-  clock_t time;
 
   /* 
-   * TODO: You can change this, using your own features,
-   * program finite state automaton, define conditions, etc.
+   * finite state automaton, define conditions, etc.
    */
 
   Features f = compute_features(x, vad_data->frame_length);
@@ -109,7 +90,6 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
 
     if (count < 10)
     {
-      //sum += pow(10, compute_features(x, vad_data->frame_length).p / 10);
       sum += compute_features(x, vad_data->frame_length).p;
       count++;
     }
@@ -117,22 +97,19 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
     {
       vad_data->state = ST_SILENCE;
       count = 0;
-      //vad_data->k0 = 10 * log10(sum /10);
       vad_data->k0 = sum/10 + 1;
       vad_data->k1 = vad_data->k0 + 27;
-      //vad_data->k2 = vad_data->k0 + 43;
       sum = 0;
     }
     break;
 
   case ST_SILENCE:
-    //float k1=k0+10; // tenint en compte que la pot sera aprox 90, la menor potencia de fricatives es 76, agafem 80 que es una mica per sota d'aquestes
 
     if (f.p > vad_data->k1)
     {
       vad_data->state = ST_MAYBE_VOICE;
       
-    } //  time = clock(); // start timer
+    }
 
     break;
 
@@ -140,7 +117,6 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
 
     if (f.p > vad_data->k1)
     {
-      //time = clock() - time;
       if (count1 >= 46)
       {
         vad_data->state = ST_VOICE;
@@ -166,7 +142,6 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
     {
       vad_data->state = ST_MAYBE_SILENCE;
     }
-    // time = clock(); // start timer
 
   break;
 
@@ -174,7 +149,6 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
 
     if (f.p < vad_data->k1)
     {
-      // time = clock() - time;
       if (count2 >= 47)
       {
         vad_data->state = ST_SILENCE;
