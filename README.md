@@ -99,15 +99,22 @@ Ejercicios
   continuación, una captura de `wavesurfer` en la que se vea con claridad la señal temporal, el contorno de
   potencia y la tasa de cruces por cero, junto con el etiquetado manual de los segmentos.
 
+<img src="img/tanh.png" width="640" align="center">
 
 - A la vista de la gráfica, indique qué valores considera adecuados para las magnitudes siguientes:
 
 	* Incremento del nivel potencia en dB, respecto al nivel correspondiente al silencio inicial, para estar
       seguros de que un segmento de señal se corresponde con voz.
 
+_Hemos podido detectar que tiene que augmentar 27dB._
+
 	* Duración mínima razonable de los segmentos de voz y silencio.
+	
+_Los segmentos de voz duran unas 46 muestras, es decir, 460ms. Y los fragmentos de silencio 470ms._
 
 	* ¿Es capaz de sacar alguna conclusión a partir de la evolución de la tasa de cruces por cero?
+	
+_**falta contestar**_
 
 
 ### Desarrollo del detector de actividad vocal
@@ -124,6 +131,9 @@ Ejercicios
 - Evalúe los resultados sobre la base de datos `db.v4` con el script `vad_evaluation.pl` e inserte a 
   continuación las tasas de sensibilidad (*recall*) y precisión para el conjunto de la base de datos (sólo
   el resumen).
+  
+  
+_Podemos ver que hay unas pequeñas discrepancias sobre el etiquetado. Se deben en parte que al etiquetar manualmente no se ha sido tan preciso como se quería_ **falta contestar**
 
 
 ### Trabajos de ampliación
