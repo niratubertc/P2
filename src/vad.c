@@ -141,7 +141,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
     if (f.p > vad_data->k1)
     {
       //time = clock() - time;
-      if (count1 > 42)
+      if (count1 >= 46)
       {
         vad_data->state = ST_VOICE;
         count1 = 0; 
@@ -175,7 +175,7 @@ VAD_STATE vad(VAD_DATA *vad_data, float *x)
     if (f.p < vad_data->k1)
     {
       // time = clock() - time;
-      if (count2 >= 13)
+      if (count2 >= 47)
       {
         vad_data->state = ST_SILENCE;
         count2 = 0;
