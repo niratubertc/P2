@@ -114,7 +114,7 @@ _Los segmentos de voz duran unas 46 muestras, es decir, 460ms. Y los fragmentos 
 
 	* ¿Es capaz de sacar alguna conclusión a partir de la evolución de la tasa de cruces por cero?
 	
-_Podemos observar como al principio de la trama hay un pico y eso es debido a que al principio tenemos silencio que dura unos 226 ms, luego la tasa de cruces por cero se estabiliza más o menos debido a que el tiempo que hay entre cada palabra y la pronunciación de la palabra dura más o menos los mismo. _
+_Podemos observar como al principio de la trama hay un pico y eso es debido a que al principio tenemos silencio que dura unos 226 ms, luego la tasa de cruces por cero se estabiliza más o menos debido a que el tiempo que hay entre cada palabra y la pronunciación de la palabra dura más o menos los mismo._
 
 
 ### Desarrollo del detector de actividad vocal
