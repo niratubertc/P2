@@ -135,21 +135,12 @@ _Podemos observar como al principio de la trama hay un pico y eso es debido a qu
   
 <img src="img/detector.PNG" width="640" align="center">
   
-_Podemos ver que hay unas pequeñas discrepancias sobre el etiquetado. Se deben en parte que al etiquetar manualmente no se ha sido tan preciso como se quería, por otra parte hay algunos errores causados por errores en la programación_
+_Podemos ver que hay unas pequeñas discrepancias sobre el etiquetado. Se deben en parte que al etiquetar manualmente no se ha sido tan preciso como se quería, por otra parte hay algunos errores causados por errores en la programación._
 
+<img src="img/evaluation.PNG" width="640" align="center">
 
-### Trabajos de ampliación
+_Vemos que la evaluación total supera por poco el 90%._
 
-#### Cancelación del ruido en los segmentos de silencio
-
-- Si ha desarrollado el algoritmo para la cancelación de los segmentos de silencio, inserte una gráfica en
-  la que se vea con claridad la señal antes y después de la cancelación (puede que `wavesurfer` no sea la
-  mejor opción para esto, ya que no es capaz de visualizar varias señales al mismo tiempo).
-
-#### Gestión de las opciones del programa usando `docopt_c`
-
-- Si ha usado `docopt_c` para realizar la gestión de las opciones y argumentos del programa `vad`, inserte
-  una captura de pantalla en la que se vea el mensaje de ayuda del programa.
 
 
 ### Contribuciones adicionales y/o comentarios acerca de la práctica
